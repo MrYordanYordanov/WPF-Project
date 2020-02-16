@@ -1,0 +1,76 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+  <EntityContainerMapping StorageEntityContainer="PointsOfInterestModelStoreContainer" CdmEntityContainer="PointsOfInterestContext">
+    <EntitySetMapping Name="Hotels">
+      <EntityTypeMapping TypeName="PointsOfInterestModel.Hotel">
+        <MappingFragment StoreEntitySet="Hotels">
+          <ScalarProperty Name="HotelName" ColumnName="HotelName" />
+          <ScalarProperty Name="IsDeleted" ColumnName="IsDeleted" />
+          <ScalarProperty Name="Place" ColumnName="Place" />
+          <ScalarProperty Name="Price" ColumnName="Price" />
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="ImageUrl" ColumnName="ImageUrl" />
+          <ScalarProperty Name="Descripiton" ColumnName="Descripiton" />
+          <ScalarProperty Name="Rate" ColumnName="Rate" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="Museums">
+      <EntityTypeMapping TypeName="PointsOfInterestModel.Museum">
+        <MappingFragment StoreEntitySet="Museums">
+          <ScalarProperty Name="IsDeleted" ColumnName="IsDeleted" />
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="MuseumName" ColumnName="MuseumName" />
+          <ScalarProperty Name="ImageUrl" ColumnName="ImageUrl" />
+          <ScalarProperty Name="Descripiton" ColumnName="Descripiton" />
+          <ScalarProperty Name="AverageRate" ColumnName="AverageRate" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="Places">
+      <EntityTypeMapping TypeName="PointsOfInterestModel.Place">
+        <MappingFragment StoreEntitySet="Places">
+          <ScalarProperty Name="IsDeleted" ColumnName="IsDeleted" />
+          <ScalarProperty Name="PlaceName" ColumnName="PlaceName" />
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="ImageUrl" ColumnName="ImageUrl" />
+          <ScalarProperty Name="Descripiton" ColumnName="Descripiton" />
+          <ScalarProperty Name="Rate" ColumnName="Rate" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="Rates">
+      <EntityTypeMapping TypeName="PointsOfInterestModel.Rate">
+        <MappingFragment StoreEntitySet="Rates">
+          <ScalarProperty Name="PlaceId" ColumnName="PlaceId" />
+          <ScalarProperty Name="HotelId" ColumnName="HotelId" />
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="RateValue" ColumnName="RateValue" />
+          <ScalarProperty Name="Fk_Museum_Id" ColumnName="Fk_Museum_Id" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="Users">
+      <EntityTypeMapping TypeName="PointsOfInterestModel.User">
+        <MappingFragment StoreEntitySet="Users">
+          <ScalarProperty Name="IsAdmin" ColumnName="IsAdmin" />
+          <ScalarProperty Name="Password" ColumnName="Password" />
+          <ScalarProperty Name="Email" ColumnName="Email" />
+          <ScalarProperty Name="Name" ColumnName="Name" />
+          <ScalarProperty Name="Id" ColumnName="Id" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="Comments">
+      <EntityTypeMapping TypeName="PointsOfInterestModel.Comment">
+        <MappingFragment StoreEntitySet="Comments">
+          <ScalarProperty Name="Fk_Museum_Id" ColumnName="Fk_Museum_Id" />
+          <ScalarProperty Name="Fk_Place_Id" ColumnName="Fk_Place_Id" />
+          <ScalarProperty Name="Fk_Hotel_Id" ColumnName="Fk_Hotel_Id" />
+          <ScalarProperty Name="Name" ColumnName="Name" />
+          <ScalarProperty Name="Id" ColumnName="Id" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+  </EntityContainerMapping>
+</Mapping>

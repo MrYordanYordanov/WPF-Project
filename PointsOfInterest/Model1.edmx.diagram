@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="06e990699b6e4392ae3cd5de05a9c2ed" Name="Diagram1" ZoomLevel="114">
+        <EntityTypeShape EntityType="PointsOfInterestModel.Hotel" Width="1.5" PointX="1" PointY="4.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="PointsOfInterestModel.Museum" Width="1.5" PointX="0.75" PointY="0.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="PointsOfInterestModel.Place" Width="1.5" PointX="3" PointY="4.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="PointsOfInterestModel.Rate" Width="1.5" PointX="3" PointY="1.125" IsExpanded="true" />
+        <AssociationConnector Association="PointsOfInterestModel.FK__Rates__Fk_Museum__1ED998B2" ManuallyRouted="false" />
+        <EntityTypeShape EntityType="PointsOfInterestModel.User" Width="1.5" PointX="5.375" PointY="0.75" />
+        <AssociationConnector Association="PointsOfInterestModel.Fk_Hotel_Id" />
+        <AssociationConnector Association="PointsOfInterestModel.Fk_Place_Id" />
+        <EntityTypeShape EntityType="PointsOfInterestModel.Comment" Width="1.5" PointX="6.875" PointY="4.75" />
+        <AssociationConnector Association="PointsOfInterestModel.FK__Comments__Fk_Hot__267ABA7A" />
+        <AssociationConnector Association="PointsOfInterestModel.FK__Comments__Fk_Mus__286302EC" />
+        <AssociationConnector Association="PointsOfInterestModel.FK__Comments__Fk_Pla__276EDEB3" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

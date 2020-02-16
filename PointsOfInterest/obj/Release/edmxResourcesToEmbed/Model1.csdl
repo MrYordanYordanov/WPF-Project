@@ -1,0 +1,184 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Schema Namespace="PointsOfInterestModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+  <EntityType Name="Hotel">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="ImageUrl" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="Descripiton" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="Rate" Type="Decimal" Precision="5" Scale="2" />
+    <Property Name="Price" Type="Decimal" Precision="5" Scale="2" />
+    <Property Name="Place" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+    <NavigationProperty Name="Rates" Relationship="PointsOfInterestModel.Fk_Hotel_Id" FromRole="Hotel" ToRole="Rate" />
+    <Property Name="IsDeleted" Type="Boolean" />
+    <Property Name="HotelName" Type="String" Nullable="false" MaxLength="255" FixedLength="false" Unicode="false" />
+    <NavigationProperty Name="Comments" Relationship="PointsOfInterestModel.FK__Comments__Fk_Hot__267ABA7A" FromRole="Hotel" ToRole="Comment" />
+  </EntityType>
+  <EntityType Name="Museum">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="MuseumName" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="ImageUrl" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="Descripiton" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="AverageRate" Type="Decimal" Precision="5" Scale="2" />
+    <NavigationProperty Name="Rates" Relationship="Self.FK__Rates__Fk_Museum__1ED998B2" FromRole="Museums" ToRole="Rates" />
+    <Property Name="IsDeleted" Type="Boolean" />
+    <NavigationProperty Name="Comments" Relationship="PointsOfInterestModel.FK__Comments__Fk_Mus__286302EC" FromRole="Museum" ToRole="Comment" />
+  </EntityType>
+  <EntityType Name="Place">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="ImageUrl" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="Descripiton" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="Rate" Type="Decimal" Precision="5" Scale="2" />
+    <Property Name="PlaceName" Type="String" Nullable="false" MaxLength="255" FixedLength="false" Unicode="false" />
+    <Property Name="IsDeleted" Type="Boolean" />
+    <NavigationProperty Name="Rates" Relationship="PointsOfInterestModel.Fk_Place_Id" FromRole="Place" ToRole="Rate" />
+    <NavigationProperty Name="Comments" Relationship="PointsOfInterestModel.FK__Comments__Fk_Pla__276EDEB3" FromRole="Place" ToRole="Comment" />
+  </EntityType>
+  <EntityType Name="Rate">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="RateValue" Type="Decimal" Precision="5" Scale="2" Nullable="false" />
+    <Property Name="Fk_Museum_Id" Type="Int32" />
+    <NavigationProperty Name="Museum" Relationship="Self.FK__Rates__Fk_Museum__1ED998B2" FromRole="Rates" ToRole="Museums" />
+    <Property Name="HotelId" Type="Int32" />
+    <NavigationProperty Name="Hotel" Relationship="PointsOfInterestModel.Fk_Hotel_Id" FromRole="Rate" ToRole="Hotel" />
+    <Property Name="PlaceId" Type="Int32" />
+    <NavigationProperty Name="Place" Relationship="PointsOfInterestModel.Fk_Place_Id" FromRole="Rate" ToRole="Place" />
+  </EntityType>
+  <Association Name="FK__Rates__Fk_Museum__1ED998B2">
+    <End Role="Museums" Type="Self.Museum" Multiplicity="0..1" />
+    <End Role="Rates" Type="Self.Rate" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Museums">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="Rates">
+        <PropertyRef Name="Fk_Museum_Id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <EntityContainer Name="PointsOfInterestContext" annotation:LazyLoadingEnabled="true">
+    <EntitySet Name="Hotels" EntityType="Self.Hotel" />
+    <EntitySet Name="Museums" EntityType="Self.Museum" />
+    <EntitySet Name="Places" EntityType="Self.Place" />
+    <EntitySet Name="Rates" EntityType="Self.Rate" />
+    <AssociationSet Name="FK__Rates__Fk_Museum__1ED998B2" Association="Self.FK__Rates__Fk_Museum__1ED998B2">
+      <End Role="Museums" EntitySet="Museums" />
+      <End Role="Rates" EntitySet="Rates" />
+    </AssociationSet>
+    <EntitySet Name="Users" EntityType="PointsOfInterestModel.User" />
+    <AssociationSet Name="Fk_Hotel_Id" Association="PointsOfInterestModel.Fk_Hotel_Id">
+      <End Role="Hotel" EntitySet="Hotels" />
+      <End Role="Rate" EntitySet="Rates" />
+    </AssociationSet>
+    <AssociationSet Name="Fk_Place_Id" Association="PointsOfInterestModel.Fk_Place_Id">
+      <End Role="Place" EntitySet="Places" />
+      <End Role="Rate" EntitySet="Rates" />
+    </AssociationSet>
+    <EntitySet Name="Comments" EntityType="PointsOfInterestModel.Comment" />
+    <AssociationSet Name="FK__Comments__Fk_Hot__267ABA7A" Association="PointsOfInterestModel.FK__Comments__Fk_Hot__267ABA7A">
+      <End Role="Hotel" EntitySet="Hotels" />
+      <End Role="Comment" EntitySet="Comments" />
+    </AssociationSet>
+    <AssociationSet Name="FK__Comments__Fk_Mus__286302EC" Association="PointsOfInterestModel.FK__Comments__Fk_Mus__286302EC">
+      <End Role="Museum" EntitySet="Museums" />
+      <End Role="Comment" EntitySet="Comments" />
+    </AssociationSet>
+    <AssociationSet Name="FK__Comments__Fk_Pla__276EDEB3" Association="PointsOfInterestModel.FK__Comments__Fk_Pla__276EDEB3">
+      <End Role="Place" EntitySet="Places" />
+      <End Role="Comment" EntitySet="Comments" />
+    </AssociationSet>
+  </EntityContainer>
+  <EntityType Name="User">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="Name" Type="String" Nullable="false" MaxLength="255" FixedLength="false" Unicode="false" />
+    <Property Name="Email" Type="String" Nullable="false" MaxLength="255" FixedLength="false" Unicode="false" />
+    <Property Name="Password" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+    <Property Name="IsAdmin" Type="Boolean" />
+  </EntityType>
+  <Association Name="Fk_Hotel_Id">
+    <End Type="PointsOfInterestModel.Hotel" Role="Hotel" Multiplicity="0..1" />
+    <End Type="PointsOfInterestModel.Rate" Role="Rate" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Hotel">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="Rate">
+        <PropertyRef Name="HotelId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="Fk_Place_Id">
+    <End Type="PointsOfInterestModel.Place" Role="Place" Multiplicity="0..1" />
+    <End Type="PointsOfInterestModel.Rate" Role="Rate" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Place">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="Rate">
+        <PropertyRef Name="PlaceId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <EntityType Name="Comment">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="Name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+    <Property Name="Fk_Hotel_Id" Type="Int32" />
+    <Property Name="Fk_Place_Id" Type="Int32" />
+    <Property Name="Fk_Museum_Id" Type="Int32" />
+    <NavigationProperty Name="Hotel" Relationship="PointsOfInterestModel.FK__Comments__Fk_Hot__267ABA7A" FromRole="Comment" ToRole="Hotel" />
+    <NavigationProperty Name="Museum" Relationship="PointsOfInterestModel.FK__Comments__Fk_Mus__286302EC" FromRole="Comment" ToRole="Museum" />
+    <NavigationProperty Name="Place" Relationship="PointsOfInterestModel.FK__Comments__Fk_Pla__276EDEB3" FromRole="Comment" ToRole="Place" />
+  </EntityType>
+  <Association Name="FK__Comments__Fk_Hot__267ABA7A">
+    <End Type="PointsOfInterestModel.Hotel" Role="Hotel" Multiplicity="0..1" />
+    <End Type="PointsOfInterestModel.Comment" Role="Comment" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Hotel">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="Comment">
+        <PropertyRef Name="Fk_Hotel_Id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK__Comments__Fk_Mus__286302EC">
+    <End Type="PointsOfInterestModel.Museum" Role="Museum" Multiplicity="0..1" />
+    <End Type="PointsOfInterestModel.Comment" Role="Comment" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Museum">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="Comment">
+        <PropertyRef Name="Fk_Museum_Id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK__Comments__Fk_Pla__276EDEB3">
+    <End Type="PointsOfInterestModel.Place" Role="Place" Multiplicity="0..1" />
+    <End Type="PointsOfInterestModel.Comment" Role="Comment" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Place">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="Comment">
+        <PropertyRef Name="Fk_Place_Id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+</Schema>
