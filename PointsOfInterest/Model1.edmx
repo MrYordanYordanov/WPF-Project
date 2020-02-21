@@ -4,7 +4,7 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-    <Schema Namespace="PointsOfInterestModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2008" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+      <Schema Namespace="Model1.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2008" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
         <EntityType Name="Comments">
           <Key>
             <PropertyRef Name="Id" />
@@ -14,6 +14,7 @@
           <Property Name="Fk_Hotel_Id" Type="int" />
           <Property Name="Fk_Place_Id" Type="int" />
           <Property Name="Fk_Museum_Id" Type="int" />
+          <Property Name="UserEmail" Type="varchar" MaxLength="255" />
         </EntityType>
         <EntityType Name="Hotels">
           <Key>
@@ -50,15 +51,32 @@
           <Property Name="Rate" Type="decimal" Precision="5" Scale="2" />
           <Property Name="IsDeleted" Type="bit" />
         </EntityType>
-        <EntityType Name="Rates">
+        <EntityType Name="Rates_Users_Hotels">
           <Key>
-            <PropertyRef Name="Id" />
+            <PropertyRef Name="UserId" />
+            <PropertyRef Name="HotelId" />
           </Key>
-          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="RateValue" Type="decimal" Precision="5" Scale="2" Nullable="false" />
-          <Property Name="Fk_Museum_Id" Type="int" />
-          <Property Name="HotelId" Type="int" />
-          <Property Name="PlaceId" Type="int" />
+          <Property Name="UserId" Type="int" Nullable="false" />
+          <Property Name="HotelId" Type="int" Nullable="false" />
+          <Property Name="Rate" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Rates_Users_Museums">
+          <Key>
+            <PropertyRef Name="UserId" />
+            <PropertyRef Name="MuseumId" />
+          </Key>
+          <Property Name="UserId" Type="int" Nullable="false" />
+          <Property Name="MuseumId" Type="int" Nullable="false" />
+          <Property Name="Rate" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Rates_Users_Places">
+          <Key>
+            <PropertyRef Name="UserId" />
+            <PropertyRef Name="PlaceId" />
+          </Key>
+          <Property Name="UserId" Type="int" Nullable="false" />
+          <Property Name="PlaceId" Type="int" Nullable="false" />
+          <Property Name="Rate" Type="int" Nullable="false" />
         </EntityType>
         <EntityType Name="Users">
           <Key>
@@ -106,48 +124,86 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Rates__Fk_Museum__1ED998B2">
-          <End Role="Museums" Type="Self.Museums" Multiplicity="0..1" />
-          <End Role="Rates" Type="Self.Rates" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Museums">
-              <PropertyRef Name="Id" />
-            </Principal>
-            <Dependent Role="Rates">
-              <PropertyRef Name="Fk_Museum_Id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="Fk_Hotel_Id">
-          <End Role="Hotels" Type="Self.Hotels" Multiplicity="0..1" />
-          <End Role="Rates" Type="Self.Rates" Multiplicity="*" />
+        <Association Name="FK_Hotel">
+          <End Role="Hotels" Type="Self.Hotels" Multiplicity="1" />
+          <End Role="Rates_Users_Hotels" Type="Self.Rates_Users_Hotels" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Hotels">
               <PropertyRef Name="Id" />
             </Principal>
-            <Dependent Role="Rates">
+            <Dependent Role="Rates_Users_Hotels">
               <PropertyRef Name="HotelId" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="Fk_Place_Id">
-          <End Role="Places" Type="Self.Places" Multiplicity="0..1" />
-          <End Role="Rates" Type="Self.Rates" Multiplicity="*" />
+        <Association Name="FK_Museum">
+          <End Role="Museums" Type="Self.Museums" Multiplicity="1" />
+          <End Role="Rates_Users_Museums" Type="Self.Rates_Users_Museums" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Museums">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Rates_Users_Museums">
+              <PropertyRef Name="MuseumId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Place">
+          <End Role="Places" Type="Self.Places" Multiplicity="1" />
+          <End Role="Rates_Users_Places" Type="Self.Rates_Users_Places" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Places">
               <PropertyRef Name="Id" />
             </Principal>
-            <Dependent Role="Rates">
+            <Dependent Role="Rates_Users_Places">
               <PropertyRef Name="PlaceId" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <EntityContainer Name="PointsOfInterestModelStoreContainer">
+        <Association Name="FK_user_hotel">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="Rates_Users_Hotels" Type="Self.Rates_Users_Hotels" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Rates_Users_Hotels">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_user_museum">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="Rates_Users_Museums" Type="Self.Rates_Users_Museums" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Rates_Users_Museums">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_user_place">
+          <End Role="Users" Type="Self.Users" Multiplicity="1" />
+          <End Role="Rates_Users_Places" Type="Self.Rates_Users_Places" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Rates_Users_Places">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="Model1StoreContainer">
           <EntitySet Name="Comments" EntityType="Self.Comments" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Hotels" EntityType="Self.Hotels" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Museums" EntityType="Self.Museums" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Places" EntityType="Self.Places" Schema="dbo" store:Type="Tables" />
-          <EntitySet Name="Rates" EntityType="Self.Rates" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Rates_Users_Hotels" EntityType="Self.Rates_Users_Hotels" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Rates_Users_Museums" EntityType="Self.Rates_Users_Museums" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Rates_Users_Places" EntityType="Self.Rates_Users_Places" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Users" EntityType="Self.Users" Schema="dbo" store:Type="Tables" />
           <AssociationSet Name="FK__Comments__Fk_Hot__267ABA7A" Association="Self.FK__Comments__Fk_Hot__267ABA7A">
             <End Role="Hotels" EntitySet="Hotels" />
@@ -161,37 +217,64 @@
             <End Role="Places" EntitySet="Places" />
             <End Role="Comments" EntitySet="Comments" />
           </AssociationSet>
-          <AssociationSet Name="FK__Rates__Fk_Museum__1ED998B2" Association="Self.FK__Rates__Fk_Museum__1ED998B2">
-            <End Role="Museums" EntitySet="Museums" />
-            <End Role="Rates" EntitySet="Rates" />
-          </AssociationSet>
-          <AssociationSet Name="Fk_Hotel_Id" Association="Self.Fk_Hotel_Id">
+          <AssociationSet Name="FK_Hotel" Association="Self.FK_Hotel">
             <End Role="Hotels" EntitySet="Hotels" />
-            <End Role="Rates" EntitySet="Rates" />
+            <End Role="Rates_Users_Hotels" EntitySet="Rates_Users_Hotels" />
           </AssociationSet>
-          <AssociationSet Name="Fk_Place_Id" Association="Self.Fk_Place_Id">
+          <AssociationSet Name="FK_Museum" Association="Self.FK_Museum">
+            <End Role="Museums" EntitySet="Museums" />
+            <End Role="Rates_Users_Museums" EntitySet="Rates_Users_Museums" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Place" Association="Self.FK_Place">
             <End Role="Places" EntitySet="Places" />
-            <End Role="Rates" EntitySet="Rates" />
+            <End Role="Rates_Users_Places" EntitySet="Rates_Users_Places" />
+          </AssociationSet>
+          <AssociationSet Name="FK_user_hotel" Association="Self.FK_user_hotel">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Rates_Users_Hotels" EntitySet="Rates_Users_Hotels" />
+          </AssociationSet>
+          <AssociationSet Name="FK_user_museum" Association="Self.FK_user_museum">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Rates_Users_Museums" EntitySet="Rates_Users_Museums" />
+          </AssociationSet>
+          <AssociationSet Name="FK_user_place" Association="Self.FK_user_place">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Rates_Users_Places" EntitySet="Rates_Users_Places" />
           </AssociationSet>
         </EntityContainer>
-      </Schema></edmx:StorageModels>
+      </Schema>
+    </edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
-      <Schema Namespace="PointsOfInterestModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+      <Schema Namespace="Model1" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="Comment">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="Fk_Hotel_Id" Type="Int32" />
+          <Property Name="Fk_Place_Id" Type="Int32" />
+          <Property Name="Fk_Museum_Id" Type="Int32" />
+          <Property Name="UserEmail" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="Hotel" Relationship="Self.FK__Comments__Fk_Hot__267ABA7A" FromRole="Comments" ToRole="Hotels" />
+          <NavigationProperty Name="Museum" Relationship="Self.FK__Comments__Fk_Mus__286302EC" FromRole="Comments" ToRole="Museums" />
+          <NavigationProperty Name="Place" Relationship="Self.FK__Comments__Fk_Pla__276EDEB3" FromRole="Comments" ToRole="Places" />
+        </EntityType>
         <EntityType Name="Hotel">
           <Key>
             <PropertyRef Name="Id" />
           </Key>
           <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="HotelName" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="ImageUrl" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Descripiton" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Rate" Type="Decimal" Precision="5" Scale="2" />
           <Property Name="Price" Type="Decimal" Precision="5" Scale="2" />
           <Property Name="Place" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
-          <NavigationProperty Name="Rates" Relationship="PointsOfInterestModel.Fk_Hotel_Id" FromRole="Hotel" ToRole="Rate" />
           <Property Name="IsDeleted" Type="Boolean" />
-          <Property Name="HotelName" Type="String" Nullable="false" MaxLength="255" FixedLength="false" Unicode="false" />
-          <NavigationProperty Name="Comments" Relationship="PointsOfInterestModel.FK__Comments__Fk_Hot__267ABA7A" FromRole="Hotel" ToRole="Comment" />
+          <NavigationProperty Name="Comments" Relationship="Self.FK__Comments__Fk_Hot__267ABA7A" FromRole="Hotels" ToRole="Comments" />
+          <NavigationProperty Name="Rates_Users_Hotels" Relationship="Self.FK_Hotel" FromRole="Hotels" ToRole="Rates_Users_Hotels" />
         </EntityType>
         <EntityType Name="Museum">
           <Key>
@@ -202,237 +285,314 @@
           <Property Name="ImageUrl" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Descripiton" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="AverageRate" Type="Decimal" Precision="5" Scale="2" />
-          <NavigationProperty Name="Rates" Relationship="Self.FK__Rates__Fk_Museum__1ED998B2" FromRole="Museums" ToRole="Rates" />
           <Property Name="IsDeleted" Type="Boolean" />
-          <NavigationProperty Name="Comments" Relationship="PointsOfInterestModel.FK__Comments__Fk_Mus__286302EC" FromRole="Museum" ToRole="Comment" />
+          <NavigationProperty Name="Comments" Relationship="Self.FK__Comments__Fk_Mus__286302EC" FromRole="Museums" ToRole="Comments" />
+          <NavigationProperty Name="Rates_Users_Museums" Relationship="Self.FK_Museum" FromRole="Museums" ToRole="Rates_Users_Museums" />
         </EntityType>
         <EntityType Name="Place">
           <Key>
             <PropertyRef Name="Id" />
           </Key>
           <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="PlaceName" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="ImageUrl" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Descripiton" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Rate" Type="Decimal" Precision="5" Scale="2" />
-          <Property Name="PlaceName" Type="String" Nullable="false" MaxLength="255" FixedLength="false" Unicode="false" />
           <Property Name="IsDeleted" Type="Boolean" />
-          <NavigationProperty Name="Rates" Relationship="PointsOfInterestModel.Fk_Place_Id" FromRole="Place" ToRole="Rate" />
-          <NavigationProperty Name="Comments" Relationship="PointsOfInterestModel.FK__Comments__Fk_Pla__276EDEB3" FromRole="Place" ToRole="Comment" />
+          <NavigationProperty Name="Comments" Relationship="Self.FK__Comments__Fk_Pla__276EDEB3" FromRole="Places" ToRole="Comments" />
+          <NavigationProperty Name="Rates_Users_Places" Relationship="Self.FK_Place" FromRole="Places" ToRole="Rates_Users_Places" />
         </EntityType>
-        <EntityType Name="Rate">
+        <EntityType Name="Rates_Users_Hotels">
           <Key>
-            <PropertyRef Name="Id" />
+            <PropertyRef Name="UserId" />
+            <PropertyRef Name="HotelId" />
           </Key>
-          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="RateValue" Type="Decimal" Precision="5" Scale="2" Nullable="false" />
-          <Property Name="Fk_Museum_Id" Type="Int32" />
-          <NavigationProperty Name="Museum" Relationship="Self.FK__Rates__Fk_Museum__1ED998B2" FromRole="Rates" ToRole="Museums" />
-          <Property Name="HotelId" Type="Int32" />
-          <NavigationProperty Name="Hotel" Relationship="PointsOfInterestModel.Fk_Hotel_Id" FromRole="Rate" ToRole="Hotel" />
-          <Property Name="PlaceId" Type="Int32" />
-          <NavigationProperty Name="Place" Relationship="PointsOfInterestModel.Fk_Place_Id" FromRole="Rate" ToRole="Place" />
+          <Property Name="UserId" Type="Int32" Nullable="false" />
+          <Property Name="HotelId" Type="Int32" Nullable="false" />
+          <Property Name="Rate" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Hotel" Relationship="Self.FK_Hotel" FromRole="Rates_Users_Hotels" ToRole="Hotels" />
+          <NavigationProperty Name="User" Relationship="Self.FK_user_hotel" FromRole="Rates_Users_Hotels" ToRole="Users" />
         </EntityType>
-        <Association Name="FK__Rates__Fk_Museum__1ED998B2">
-          <End Role="Museums" Type="Self.Museum" Multiplicity="0..1" />
-          <End Role="Rates" Type="Self.Rate" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Museums">
-              <PropertyRef Name="Id" />
-            </Principal>
-            <Dependent Role="Rates">
-              <PropertyRef Name="Fk_Museum_Id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <EntityContainer Name="PointsOfInterestContext" annotation:LazyLoadingEnabled="true">
-          <EntitySet Name="Hotels" EntityType="Self.Hotel" />
-          <EntitySet Name="Museums" EntityType="Self.Museum" />
-          <EntitySet Name="Places" EntityType="Self.Place" />
-          <EntitySet Name="Rates" EntityType="Self.Rate" />
-          <AssociationSet Name="FK__Rates__Fk_Museum__1ED998B2" Association="Self.FK__Rates__Fk_Museum__1ED998B2">
-            <End Role="Museums" EntitySet="Museums" />
-            <End Role="Rates" EntitySet="Rates" />
-          </AssociationSet>
-          <EntitySet Name="Users" EntityType="PointsOfInterestModel.User" />
-          <AssociationSet Name="Fk_Hotel_Id" Association="PointsOfInterestModel.Fk_Hotel_Id">
-            <End Role="Hotel" EntitySet="Hotels" />
-            <End Role="Rate" EntitySet="Rates" />
-          </AssociationSet>
-          <AssociationSet Name="Fk_Place_Id" Association="PointsOfInterestModel.Fk_Place_Id">
-            <End Role="Place" EntitySet="Places" />
-            <End Role="Rate" EntitySet="Rates" />
-          </AssociationSet>
-          <EntitySet Name="Comments" EntityType="PointsOfInterestModel.Comment" />
-          <AssociationSet Name="FK__Comments__Fk_Hot__267ABA7A" Association="PointsOfInterestModel.FK__Comments__Fk_Hot__267ABA7A">
-            <End Role="Hotel" EntitySet="Hotels" />
-            <End Role="Comment" EntitySet="Comments" />
-          </AssociationSet>
-          <AssociationSet Name="FK__Comments__Fk_Mus__286302EC" Association="PointsOfInterestModel.FK__Comments__Fk_Mus__286302EC">
-            <End Role="Museum" EntitySet="Museums" />
-            <End Role="Comment" EntitySet="Comments" />
-          </AssociationSet>
-          <AssociationSet Name="FK__Comments__Fk_Pla__276EDEB3" Association="PointsOfInterestModel.FK__Comments__Fk_Pla__276EDEB3">
-            <End Role="Place" EntitySet="Places" />
-            <End Role="Comment" EntitySet="Comments" />
-          </AssociationSet>
-        </EntityContainer>
+        <EntityType Name="Rates_Users_Museums">
+          <Key>
+            <PropertyRef Name="UserId" />
+            <PropertyRef Name="MuseumId" />
+          </Key>
+          <Property Name="UserId" Type="Int32" Nullable="false" />
+          <Property Name="MuseumId" Type="Int32" Nullable="false" />
+          <Property Name="Rate" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Museum" Relationship="Self.FK_Museum" FromRole="Rates_Users_Museums" ToRole="Museums" />
+          <NavigationProperty Name="User" Relationship="Self.FK_user_museum" FromRole="Rates_Users_Museums" ToRole="Users" />
+        </EntityType>
+        <EntityType Name="Rates_Users_Places">
+          <Key>
+            <PropertyRef Name="UserId" />
+            <PropertyRef Name="PlaceId" />
+          </Key>
+          <Property Name="UserId" Type="Int32" Nullable="false" />
+          <Property Name="PlaceId" Type="Int32" Nullable="false" />
+          <Property Name="Rate" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Place" Relationship="Self.FK_Place" FromRole="Rates_Users_Places" ToRole="Places" />
+          <NavigationProperty Name="User" Relationship="Self.FK_user_place" FromRole="Rates_Users_Places" ToRole="Users" />
+        </EntityType>
         <EntityType Name="User">
           <Key>
             <PropertyRef Name="Id" />
           </Key>
           <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="Name" Type="String" Nullable="false" MaxLength="255" FixedLength="false" Unicode="false" />
-          <Property Name="Email" Type="String" Nullable="false" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="Name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Email" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Password" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
           <Property Name="IsAdmin" Type="Boolean" />
-        </EntityType>
-        <Association Name="Fk_Hotel_Id">
-          <End Type="PointsOfInterestModel.Hotel" Role="Hotel" Multiplicity="0..1" />
-          <End Type="PointsOfInterestModel.Rate" Role="Rate" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Hotel">
-              <PropertyRef Name="Id" />
-            </Principal>
-            <Dependent Role="Rate">
-              <PropertyRef Name="HotelId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="Fk_Place_Id">
-          <End Type="PointsOfInterestModel.Place" Role="Place" Multiplicity="0..1" />
-          <End Type="PointsOfInterestModel.Rate" Role="Rate" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Place">
-              <PropertyRef Name="Id" />
-            </Principal>
-            <Dependent Role="Rate">
-              <PropertyRef Name="PlaceId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <EntityType Name="Comment">
-          <Key>
-            <PropertyRef Name="Id" />
-          </Key>
-          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="Name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
-          <Property Name="Fk_Hotel_Id" Type="Int32" />
-          <Property Name="Fk_Place_Id" Type="Int32" />
-          <Property Name="Fk_Museum_Id" Type="Int32" />
-          <NavigationProperty Name="Hotel" Relationship="PointsOfInterestModel.FK__Comments__Fk_Hot__267ABA7A" FromRole="Comment" ToRole="Hotel" />
-          <NavigationProperty Name="Museum" Relationship="PointsOfInterestModel.FK__Comments__Fk_Mus__286302EC" FromRole="Comment" ToRole="Museum" />
-          <NavigationProperty Name="Place" Relationship="PointsOfInterestModel.FK__Comments__Fk_Pla__276EDEB3" FromRole="Comment" ToRole="Place" />
+          <NavigationProperty Name="Rates_Users_Hotels" Relationship="Self.FK_user_hotel" FromRole="Users" ToRole="Rates_Users_Hotels" />
+          <NavigationProperty Name="Rates_Users_Museums" Relationship="Self.FK_user_museum" FromRole="Users" ToRole="Rates_Users_Museums" />
+          <NavigationProperty Name="Rates_Users_Places" Relationship="Self.FK_user_place" FromRole="Users" ToRole="Rates_Users_Places" />
         </EntityType>
         <Association Name="FK__Comments__Fk_Hot__267ABA7A">
-          <End Type="PointsOfInterestModel.Hotel" Role="Hotel" Multiplicity="0..1" />
-          <End Type="PointsOfInterestModel.Comment" Role="Comment" Multiplicity="*" />
+          <End Role="Hotels" Type="Self.Hotel" Multiplicity="0..1" />
+          <End Role="Comments" Type="Self.Comment" Multiplicity="*" />
           <ReferentialConstraint>
-            <Principal Role="Hotel">
+            <Principal Role="Hotels">
               <PropertyRef Name="Id" />
             </Principal>
-            <Dependent Role="Comment">
+            <Dependent Role="Comments">
               <PropertyRef Name="Fk_Hotel_Id" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
         <Association Name="FK__Comments__Fk_Mus__286302EC">
-          <End Type="PointsOfInterestModel.Museum" Role="Museum" Multiplicity="0..1" />
-          <End Type="PointsOfInterestModel.Comment" Role="Comment" Multiplicity="*" />
+          <End Role="Museums" Type="Self.Museum" Multiplicity="0..1" />
+          <End Role="Comments" Type="Self.Comment" Multiplicity="*" />
           <ReferentialConstraint>
-            <Principal Role="Museum">
+            <Principal Role="Museums">
               <PropertyRef Name="Id" />
             </Principal>
-            <Dependent Role="Comment">
+            <Dependent Role="Comments">
               <PropertyRef Name="Fk_Museum_Id" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
         <Association Name="FK__Comments__Fk_Pla__276EDEB3">
-          <End Type="PointsOfInterestModel.Place" Role="Place" Multiplicity="0..1" />
-          <End Type="PointsOfInterestModel.Comment" Role="Comment" Multiplicity="*" />
+          <End Role="Places" Type="Self.Place" Multiplicity="0..1" />
+          <End Role="Comments" Type="Self.Comment" Multiplicity="*" />
           <ReferentialConstraint>
-            <Principal Role="Place">
+            <Principal Role="Places">
               <PropertyRef Name="Id" />
             </Principal>
-            <Dependent Role="Comment">
+            <Dependent Role="Comments">
               <PropertyRef Name="Fk_Place_Id" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_Hotel">
+          <End Role="Hotels" Type="Self.Hotel" Multiplicity="1" />
+          <End Role="Rates_Users_Hotels" Type="Self.Rates_Users_Hotels" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Hotels">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Rates_Users_Hotels">
+              <PropertyRef Name="HotelId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Museum">
+          <End Role="Museums" Type="Self.Museum" Multiplicity="1" />
+          <End Role="Rates_Users_Museums" Type="Self.Rates_Users_Museums" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Museums">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Rates_Users_Museums">
+              <PropertyRef Name="MuseumId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Place">
+          <End Role="Places" Type="Self.Place" Multiplicity="1" />
+          <End Role="Rates_Users_Places" Type="Self.Rates_Users_Places" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Places">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Rates_Users_Places">
+              <PropertyRef Name="PlaceId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_user_hotel">
+          <End Role="Users" Type="Self.User" Multiplicity="1" />
+          <End Role="Rates_Users_Hotels" Type="Self.Rates_Users_Hotels" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Rates_Users_Hotels">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_user_museum">
+          <End Role="Users" Type="Self.User" Multiplicity="1" />
+          <End Role="Rates_Users_Museums" Type="Self.Rates_Users_Museums" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Rates_Users_Museums">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_user_place">
+          <End Role="Users" Type="Self.User" Multiplicity="1" />
+          <End Role="Rates_Users_Places" Type="Self.Rates_Users_Places" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Rates_Users_Places">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="PointsOfInterestContext" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="Comments" EntityType="Self.Comment" />
+          <EntitySet Name="Hotels" EntityType="Self.Hotel" />
+          <EntitySet Name="Museums" EntityType="Self.Museum" />
+          <EntitySet Name="Places" EntityType="Self.Place" />
+          <EntitySet Name="Rates_Users_Hotels" EntityType="Self.Rates_Users_Hotels" />
+          <EntitySet Name="Rates_Users_Museums" EntityType="Self.Rates_Users_Museums" />
+          <EntitySet Name="Rates_Users_Places" EntityType="Self.Rates_Users_Places" />
+          <EntitySet Name="Users" EntityType="Self.User" />
+          <AssociationSet Name="FK__Comments__Fk_Hot__267ABA7A" Association="Self.FK__Comments__Fk_Hot__267ABA7A">
+            <End Role="Hotels" EntitySet="Hotels" />
+            <End Role="Comments" EntitySet="Comments" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Comments__Fk_Mus__286302EC" Association="Self.FK__Comments__Fk_Mus__286302EC">
+            <End Role="Museums" EntitySet="Museums" />
+            <End Role="Comments" EntitySet="Comments" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Comments__Fk_Pla__276EDEB3" Association="Self.FK__Comments__Fk_Pla__276EDEB3">
+            <End Role="Places" EntitySet="Places" />
+            <End Role="Comments" EntitySet="Comments" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Hotel" Association="Self.FK_Hotel">
+            <End Role="Hotels" EntitySet="Hotels" />
+            <End Role="Rates_Users_Hotels" EntitySet="Rates_Users_Hotels" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Museum" Association="Self.FK_Museum">
+            <End Role="Museums" EntitySet="Museums" />
+            <End Role="Rates_Users_Museums" EntitySet="Rates_Users_Museums" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Place" Association="Self.FK_Place">
+            <End Role="Places" EntitySet="Places" />
+            <End Role="Rates_Users_Places" EntitySet="Rates_Users_Places" />
+          </AssociationSet>
+          <AssociationSet Name="FK_user_hotel" Association="Self.FK_user_hotel">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Rates_Users_Hotels" EntitySet="Rates_Users_Hotels" />
+          </AssociationSet>
+          <AssociationSet Name="FK_user_museum" Association="Self.FK_user_museum">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Rates_Users_Museums" EntitySet="Rates_Users_Museums" />
+          </AssociationSet>
+          <AssociationSet Name="FK_user_place" Association="Self.FK_user_place">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Rates_Users_Places" EntitySet="Rates_Users_Places" />
+          </AssociationSet>
+        </EntityContainer>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
     <edmx:Mappings>
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
-        <EntityContainerMapping StorageEntityContainer="PointsOfInterestModelStoreContainer" CdmEntityContainer="PointsOfInterestContext">
-          <EntitySetMapping Name="Hotels">
-            <EntityTypeMapping TypeName="PointsOfInterestModel.Hotel">
-              <MappingFragment StoreEntitySet="Hotels">
-                <ScalarProperty Name="HotelName" ColumnName="HotelName" />
-                <ScalarProperty Name="IsDeleted" ColumnName="IsDeleted" />
-                <ScalarProperty Name="Place" ColumnName="Place" />
-                <ScalarProperty Name="Price" ColumnName="Price" />
+        <EntityContainerMapping StorageEntityContainer="Model1StoreContainer" CdmEntityContainer="PointsOfInterestContext">
+          <EntitySetMapping Name="Comments">
+            <EntityTypeMapping TypeName="Model1.Comment">
+              <MappingFragment StoreEntitySet="Comments">
                 <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="Fk_Hotel_Id" ColumnName="Fk_Hotel_Id" />
+                <ScalarProperty Name="Fk_Place_Id" ColumnName="Fk_Place_Id" />
+                <ScalarProperty Name="Fk_Museum_Id" ColumnName="Fk_Museum_Id" />
+                <ScalarProperty Name="UserEmail" ColumnName="UserEmail" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Hotels">
+            <EntityTypeMapping TypeName="Model1.Hotel">
+              <MappingFragment StoreEntitySet="Hotels">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="HotelName" ColumnName="HotelName" />
                 <ScalarProperty Name="ImageUrl" ColumnName="ImageUrl" />
                 <ScalarProperty Name="Descripiton" ColumnName="Descripiton" />
                 <ScalarProperty Name="Rate" ColumnName="Rate" />
+                <ScalarProperty Name="Price" ColumnName="Price" />
+                <ScalarProperty Name="Place" ColumnName="Place" />
+                <ScalarProperty Name="IsDeleted" ColumnName="IsDeleted" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="Museums">
-            <EntityTypeMapping TypeName="PointsOfInterestModel.Museum">
+            <EntityTypeMapping TypeName="Model1.Museum">
               <MappingFragment StoreEntitySet="Museums">
-                <ScalarProperty Name="IsDeleted" ColumnName="IsDeleted" />
                 <ScalarProperty Name="Id" ColumnName="Id" />
                 <ScalarProperty Name="MuseumName" ColumnName="MuseumName" />
                 <ScalarProperty Name="ImageUrl" ColumnName="ImageUrl" />
                 <ScalarProperty Name="Descripiton" ColumnName="Descripiton" />
                 <ScalarProperty Name="AverageRate" ColumnName="AverageRate" />
+                <ScalarProperty Name="IsDeleted" ColumnName="IsDeleted" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="Places">
-            <EntityTypeMapping TypeName="PointsOfInterestModel.Place">
+            <EntityTypeMapping TypeName="Model1.Place">
               <MappingFragment StoreEntitySet="Places">
-                <ScalarProperty Name="IsDeleted" ColumnName="IsDeleted" />
-                <ScalarProperty Name="PlaceName" ColumnName="PlaceName" />
                 <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="PlaceName" ColumnName="PlaceName" />
                 <ScalarProperty Name="ImageUrl" ColumnName="ImageUrl" />
                 <ScalarProperty Name="Descripiton" ColumnName="Descripiton" />
+                <ScalarProperty Name="Rate" ColumnName="Rate" />
+                <ScalarProperty Name="IsDeleted" ColumnName="IsDeleted" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Rates_Users_Hotels">
+            <EntityTypeMapping TypeName="Model1.Rates_Users_Hotels">
+              <MappingFragment StoreEntitySet="Rates_Users_Hotels">
+                <ScalarProperty Name="UserId" ColumnName="UserId" />
+                <ScalarProperty Name="HotelId" ColumnName="HotelId" />
                 <ScalarProperty Name="Rate" ColumnName="Rate" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="Rates">
-            <EntityTypeMapping TypeName="PointsOfInterestModel.Rate">
-              <MappingFragment StoreEntitySet="Rates">
+          <EntitySetMapping Name="Rates_Users_Museums">
+            <EntityTypeMapping TypeName="Model1.Rates_Users_Museums">
+              <MappingFragment StoreEntitySet="Rates_Users_Museums">
+                <ScalarProperty Name="UserId" ColumnName="UserId" />
+                <ScalarProperty Name="MuseumId" ColumnName="MuseumId" />
+                <ScalarProperty Name="Rate" ColumnName="Rate" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Rates_Users_Places">
+            <EntityTypeMapping TypeName="Model1.Rates_Users_Places">
+              <MappingFragment StoreEntitySet="Rates_Users_Places">
+                <ScalarProperty Name="UserId" ColumnName="UserId" />
                 <ScalarProperty Name="PlaceId" ColumnName="PlaceId" />
-                <ScalarProperty Name="HotelId" ColumnName="HotelId" />
-                <ScalarProperty Name="Id" ColumnName="Id" />
-                <ScalarProperty Name="RateValue" ColumnName="RateValue" />
-                <ScalarProperty Name="Fk_Museum_Id" ColumnName="Fk_Museum_Id" />
+                <ScalarProperty Name="Rate" ColumnName="Rate" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="Users">
-            <EntityTypeMapping TypeName="PointsOfInterestModel.User">
+            <EntityTypeMapping TypeName="Model1.User">
               <MappingFragment StoreEntitySet="Users">
-                <ScalarProperty Name="IsAdmin" ColumnName="IsAdmin" />
-                <ScalarProperty Name="Password" ColumnName="Password" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
                 <ScalarProperty Name="Email" ColumnName="Email" />
-                <ScalarProperty Name="Name" ColumnName="Name" />
-                <ScalarProperty Name="Id" ColumnName="Id" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="Comments">
-            <EntityTypeMapping TypeName="PointsOfInterestModel.Comment">
-              <MappingFragment StoreEntitySet="Comments">
-                <ScalarProperty Name="Fk_Museum_Id" ColumnName="Fk_Museum_Id" />
-                <ScalarProperty Name="Fk_Place_Id" ColumnName="Fk_Place_Id" />
-                <ScalarProperty Name="Fk_Hotel_Id" ColumnName="Fk_Hotel_Id" />
-                <ScalarProperty Name="Name" ColumnName="Name" />
-                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="Password" ColumnName="Password" />
+                <ScalarProperty Name="IsAdmin" ColumnName="IsAdmin" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

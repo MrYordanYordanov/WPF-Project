@@ -12,6 +12,8 @@
                 <GridView>
                     <GridViewColumn Width="140" Header="Name"
          DisplayMemberBinding="{Binding Name}"  />
+                    <GridViewColumn Width="140" Header="User Email"
+         DisplayMemberBinding="{Binding UserEmail}"  />
                 </GridView>
             </ListView.View>
         </ListView>

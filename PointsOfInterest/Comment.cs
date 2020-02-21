@@ -19,6 +19,7 @@ namespace PointsOfInterest
         public Nullable<int> Fk_Hotel_Id { get; set; }
         public Nullable<int> Fk_Place_Id { get; set; }
         public Nullable<int> Fk_Museum_Id { get; set; }
+        public string UserEmail { get; set; }
     
         public virtual Hotel Hotel { get; set; }
         public virtual Museum Museum { get; set; }

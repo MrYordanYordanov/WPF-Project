@@ -17,20 +17,20 @@ namespace PointsOfInterest
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Place()
         {
-            this.Rates = new HashSet<Rate>();
             this.Comments = new HashSet<Comment>();
+            this.Rates_Users_Places = new HashSet<Rates_Users_Places>();
         }
     
         public int Id { get; set; }
+        public string PlaceName { get; set; }
         public string ImageUrl { get; set; }
         public string Descripiton { get; set; }
         public Nullable<decimal> Rate { get; set; }
-        public string PlaceName { get; set; }
         public Nullable<bool> IsDeleted { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Rate> Rates { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Comment> Comments { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Rates_Users_Places> Rates_Users_Places { get; set; }
     }
 }

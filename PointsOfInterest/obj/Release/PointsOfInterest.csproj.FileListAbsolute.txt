@@ -41,3 +41,8 @@ C:\Users\i.iordanov\Documents\Visual Studio 2017\Projects\PointsOfInterest\Point
 C:\Users\i.iordanov\Documents\Visual Studio 2017\Projects\PointsOfInterest\PointsOfInterest\bin\Release\log4net.xml
 C:\Users\i.iordanov\Documents\Visual Studio 2017\Projects\PointsOfInterest\PointsOfInterest\obj\Release\CommentWindow.g.cs
 C:\Users\i.iordanov\Documents\Visual Studio 2017\Projects\PointsOfInterest\PointsOfInterest\obj\Release\CommentWindow.baml
+C:\Users\i.iordanov\Documents\Visual Studio 2017\Projects\PointsOfInterest\PointsOfInterest\obj\Release\Home.g.cs
+C:\Users\i.iordanov\Documents\Visual Studio 2017\Projects\PointsOfInterest\PointsOfInterest\obj\Release\Home.baml
+C:\Users\i.iordanov\Documents\Visual Studio 2017\Projects\PointsOfInterest\PointsOfInterest\obj\Release\Rating.g.cs
+C:\Users\i.iordanov\Documents\Visual Studio 2017\Projects\PointsOfInterest\PointsOfInterest\obj\Release\GeneratedInternalTypeHelper.g.cs
+C:\Users\i.iordanov\Documents\Visual Studio 2017\Projects\PointsOfInterest\PointsOfInterest\obj\Release\Rating.baml

@@ -25,39 +25,19 @@ namespace PointsOfInterest
             InitializeComponent();
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            var page = new Museums();
-            page.Show();
-            this.Close();
-        }
-
         private void Button_Click_1(object sender, RoutedEventArgs e)
-        {
+        {   
             var page = new Register();
             page.Show();
             this.Close();
         }
-
+        
         private void Button_Click_2(object sender, RoutedEventArgs e)
-        {
-            var page = new HotelsWindow();
-            page.Show();
-            this.Close();
-        }
-
-        private void Button_Click_3(object sender, RoutedEventArgs e)
         {
             var page = new Login();
             page.Show();
             this.Close();
         }
-
-        private void Button_Click_4(object sender, RoutedEventArgs e)
-        {
-            var page = new Places();
-            page.Show();
-            this.Close();
-        }
+        
     }
 }

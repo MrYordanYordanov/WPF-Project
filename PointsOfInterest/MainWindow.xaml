@@ -7,13 +7,11 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="474.209" Width="800">
     <Grid>
-        <Button Content="Museums"  Background="Lavender" HorizontalAlignment="Left" Margin="30,35,0,0" VerticalAlignment="Top" Width="190" Height="95" Click="Button_Click"/>
-        <Button Content="Register" Background="DarkSeaGreen" HorizontalAlignment="Left" Margin="74,286,0,0" VerticalAlignment="Top" Width="163" RenderTransformOrigin="0.913,1.203" Height="51" Click="Button_Click_1"/>
-        <Button Content="Hotels"  Background="Bisque" HorizontalAlignment="Left" Margin="294,35,0,0" VerticalAlignment="Top" Width="187" Height="95" Click="Button_Click_2"/>
-        <Button Content="Login" HorizontalAlignment="Left" Background="LightGoldenrodYellow"
-                Margin="576,286,0,0" VerticalAlignment="Top" Width="163" Height="49" Click="Button_Click_3"/>
-        <Button Content="Places" HorizontalAlignment="Left" Background="CadetBlue"
-                Height="95" Margin="544,35,0,0" VerticalAlignment="Top" Width="195" Click="Button_Click_4"/>
+
+        <Button Content="Register"  Background="DarkSeaGreen" FontSize="30" 
+HorizontalAlignment="Left" Margin="212,60,0,0" VerticalAlignment="Top" Width="265" RenderTransformOrigin="0.913,1.203" Height="90" Click="Button_Click_1"/>
+        <Button Content="Login" HorizontalAlignment="Left"   FontSize="30" Background="LightGoldenrodYellow"
+                Margin="212,242,0,0" VerticalAlignment="Top" Width="265" Height="94" Click="Button_Click_2"/>
 
     </Grid>
 

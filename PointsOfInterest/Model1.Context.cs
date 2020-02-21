@@ -25,11 +25,13 @@ namespace PointsOfInterest
             throw new UnintentionalCodeFirstException();
         }
     
+        public virtual DbSet<Comment> Comments { get; set; }
         public virtual DbSet<Hotel> Hotels { get; set; }
         public virtual DbSet<Museum> Museums { get; set; }
         public virtual DbSet<Place> Places { get; set; }
-        public virtual DbSet<Rate> Rates { get; set; }
+        public virtual DbSet<Rates_Users_Hotels> Rates_Users_Hotels { get; set; }
+        public virtual DbSet<Rates_Users_Museums> Rates_Users_Museums { get; set; }
+        public virtual DbSet<Rates_Users_Places> Rates_Users_Places { get; set; }
         public virtual DbSet<User> Users { get; set; }
-        public virtual DbSet<Comment> Comments { get; set; }
     }
 }

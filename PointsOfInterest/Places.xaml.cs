@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PointsOfInterest.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
@@ -8,6 +9,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
+using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -67,8 +69,9 @@ namespace PointsOfInterest
             AddPlace.Visibility = Visibility.Hidden;
             NameLabel.Visibility = Visibility.Hidden;
             DesLabel.Visibility = Visibility.Hidden;
-            ImgLabel.Visibility = Visibility.Hidden;
+            PlaceImageName.Visibility = Visibility.Hidden;
             DeletePlace.Visibility = Visibility.Hidden;
+            SeedFromFile.Visibility = Visibility.Hidden;
         }
 
         private List<Place> LoadCollectionData()
@@ -82,14 +85,10 @@ namespace PointsOfInterest
 
                 foreach (var item in placesToReturn)
                 {
-                    try
-                    {
-                        item.Rate = item.Rates.Average(x => x.RateValue);
-                    }
-                    catch
-                    {
-                        item.Rate = 0.00m;
-                    }
+                    var ratesPlaces = db.Rates_Users_Places
+                     .Where(x => x.PlaceId == item.Id).ToList();
+
+                    item.Rate = CalculateAverageRate(ratesPlaces);
                 }
             }
 
@@ -110,11 +109,12 @@ namespace PointsOfInterest
         {
             var placeName = PlaceName.Text;
             var placeDes = PlaceDes.Text;
-            var imageName = PlaceImageName.Text;
+            var imagePath = PlaceImageName.Text;
 
             if (!String.IsNullOrEmpty(placeName) && !String.IsNullOrEmpty(placeDes)
-                && !String.IsNullOrEmpty(imageName))
+                && !String.IsNullOrEmpty(imagePath))
             {
+                var imageName = ImageSaver.Save("Places", imagePath);
                 var place= new Place();
                 place.PlaceName = placeName;
                 place.Descripiton = placeDes;
@@ -130,10 +130,15 @@ namespace PointsOfInterest
                 PlaceName.Text = "";
                 PlaceDes.Text = "";
                 PlaceImageName.Text = "";
+
+                places.ItemsSource = this.LoadCollectionData();
+                places.Items.Refresh();
+
+                ErrrorMessage.Content = "";
             }
             else
             {
-                MessageBox.Show("Name, Description, Image Name cannot be empty");
+                ErrrorMessage.Content="Name, Description, Image Name cannot be empty";
             }
         }
 
@@ -172,14 +177,10 @@ namespace PointsOfInterest
 
                 foreach (var item in placesToReturn)
                 {
-                    try
-                    {
-                        item.Rate = item.Rates.Average(x => x.RateValue);
-                    }
-                    catch
-                    {
-                        item.Rate = 0.00m;
-                    }
+                    var ratesPlaces = db.Rates_Users_Places
+                    .Where(x => x.PlaceId == item.Id).ToList();
+
+                    item.Rate = CalculateAverageRate(ratesPlaces);
                 }
             }
 
@@ -190,9 +191,103 @@ namespace PointsOfInterest
 
         private void Button_Click_4(object sender, RoutedEventArgs e)
         {
-            var window = new MainWindow();
+            var window = new Home();
             window.Show();
             this.Close();
+        }
+
+        private decimal CalculateAverageRate(List<Rates_Users_Places> rates)
+        {
+            var averageRate = 0.00m;
+            if (rates.Count > 0)
+            {
+                var fiveCount = rates.Count(x => x.Rate == 5);
+                var fourCount = rates.Count(x => x.Rate == 4);
+                var threeCount = rates.Count(x => x.Rate == 3);
+                var twoCount = rates.Count(x => x.Rate == 2);
+                var oneCount = rates.Count(x => x.Rate == 1);
+
+                averageRate = RateCalculator.Calculcate(fiveCount, fourCount, threeCount, twoCount, oneCount);
+            }
+
+            return averageRate;
+        }
+
+        private void SeedFromFile_Click(object sender, RoutedEventArgs e)
+        {
+            var dir = System.IO.Directory.GetParent(Environment.CurrentDirectory).ToString();
+            var path = System.IO.Path.GetDirectoryName(dir);
+            var combinePath = System.IO.Path.Combine(path + "/Files/PLaces" + ".txt");
+            var lines = System.IO.File.ReadAllLines(combinePath);
+
+            var items = new List<Place>();
+            foreach (var line in lines)
+            {
+                var splitLine = line.Split(';');
+                var name = splitLine[0];
+                var img = splitLine[1];
+                var des = splitLine[2];
+
+                var item = new Place
+                {
+                    PlaceName = name,
+                    ImageUrl = img,
+                    Descripiton = des
+                };
+                items.Add(item);
+            }
+
+            using (var db = new PointsOfInterestContext())
+            {
+                foreach (var item in items)
+                {
+                    var existItem = db.Places.SingleOrDefault(x => x.PlaceName == item.PlaceName);
+
+                    if (existItem == null)
+                    {
+                        db.Places.Add(item);
+                    }
+                }
+
+                db.SaveChanges();
+            }
+
+            var itemsToReturn = new List<Place>();
+            using (var db = new PointsOfInterestContext())
+            {
+                itemsToReturn = db.Places
+                  .Where(x => (x.IsDeleted == false || x.IsDeleted == null))
+                  .ToList();
+
+                foreach (var item in itemsToReturn)
+                {
+                    var ratesPlaces = db.Rates_Users_Places
+                       .Where(x => x.PlaceId == item.Id).ToList();
+
+                    item.Rate = this.CalculateAverageRate(ratesPlaces);
+                }
+            }
+
+            places.ItemsSource = itemsToReturn;
+            places.Items.Refresh();
+        }
+
+        private void BrowseButton_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog dlg = new OpenFileDialog();
+            dlg.InitialDirectory = "c:\\";
+            dlg.Filter = "Image files (*.jpg)|*.jpg|All Files (*.*)|*.*";
+            dlg.RestoreDirectory = true;
+
+            if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                string selectedFileName = dlg.FileName;
+                PlaceImageName.Text = selectedFileName;
+                BitmapImage bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.UriSource = new Uri(selectedFileName);
+                bitmap.EndInit();
+            }
         }
     }
 }

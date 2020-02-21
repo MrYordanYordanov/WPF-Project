@@ -17,22 +17,22 @@ namespace PointsOfInterest
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Hotel()
         {
-            this.Rates = new HashSet<Rate>();
             this.Comments = new HashSet<Comment>();
+            this.Rates_Users_Hotels = new HashSet<Rates_Users_Hotels>();
         }
     
         public int Id { get; set; }
+        public string HotelName { get; set; }
         public string ImageUrl { get; set; }
         public string Descripiton { get; set; }
         public Nullable<decimal> Rate { get; set; }
         public Nullable<decimal> Price { get; set; }
         public string Place { get; set; }
         public Nullable<bool> IsDeleted { get; set; }
-        public string HotelName { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Rate> Rates { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Comment> Comments { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Rates_Users_Hotels> Rates_Users_Hotels { get; set; }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿    using PointsOfInterest.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
@@ -8,6 +9,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
+using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -52,7 +54,7 @@ namespace PointsOfInterest
             }
             catch
             {
-                
+
             }
 
             return false;
@@ -67,12 +69,13 @@ namespace PointsOfInterest
             AddHotel.Visibility = Visibility.Hidden;
             NameLabel.Visibility = Visibility.Hidden;
             DesLabel.Visibility = Visibility.Hidden;
-            ImgLabel.Visibility = Visibility.Hidden;
+            BrowseButton.Visibility = Visibility.Hidden;
             DeleteHotel.Visibility = Visibility.Hidden;
             PlaceLabel.Visibility = Visibility.Hidden;
             PriceLabel.Visibility = Visibility.Hidden;
             HotelPlace.Visibility = Visibility.Hidden;
             HotelPrice.Visibility = Visibility.Hidden;
+            SeedFromFile.Visibility = Visibility.Hidden;
         }
 
         private List<Hotel> LoadCollectionData()
@@ -81,20 +84,15 @@ namespace PointsOfInterest
             using (var db = new PointsOfInterestContext())
             {
                 hotelsToReturn = db.Hotels
-                    .Where(x => x.IsDeleted == false || x.IsDeleted==null)
+                    .Where(x => x.IsDeleted == false || x.IsDeleted == null)
                     .ToList();
-                
+
                 foreach (var item in hotelsToReturn)
                 {
-                    try
-                    {
-                        item.Rate = item.Rates.Average(x => x.RateValue);
-                    }
-                    catch
-                    {
-                        item.Rate = 0.00m;
-                    }
-                   
+                    var ratesHotel = db.Rates_Users_Hotels
+                       .Where(x => x.HotelId == item.Id).ToList();
+
+                    item.Rate = this.CalculateAverageRate(ratesHotel);
                 }
             }
 
@@ -114,14 +112,14 @@ namespace PointsOfInterest
         {
             var name = HotelName.Text;
             var des = HotelDes.Text;
-            var imageName = HotelImageName.Text;
+            var imagePath = HotelImageName.Text;
             var place = HotelPlace.Text;
             var price = HotelPrice.Text;
 
             var parsedPriceNumber = 0.00m;
 
             if (!String.IsNullOrEmpty(name) && !String.IsNullOrEmpty(des)
-                && !String.IsNullOrEmpty(imageName) && !String.IsNullOrEmpty(place)
+                && !String.IsNullOrEmpty(imagePath) && !String.IsNullOrEmpty(place)
                 && !String.IsNullOrEmpty(price))
             {
                 var parsedPrice = Decimal.TryParse(price, out parsedPriceNumber);
@@ -130,10 +128,11 @@ namespace PointsOfInterest
                 {
                     if (parsedPriceNumber < 0)
                     {
-                        MessageBox.Show("Price cannot be a negative number");
+                        ErrrorMessage.Content="Price cannot be a negative number";
                     }
                     else
                     {
+                        var imageName=ImageSaver.Save("Hotels", imagePath);
                         var hotel = new Hotel();
                         hotel.HotelName = name;
                         hotel.Descripiton = des;
@@ -153,17 +152,22 @@ namespace PointsOfInterest
                         HotelImageName.Text = "";
                         HotelPlace.Text = "";
                         HotelPrice.Text = "";
+
+                        hotels.ItemsSource = this.LoadCollectionData();
+                        hotels.Items.Refresh();
+
+                        ErrrorMessage.Content = "";
                     }
-                    
+
                 }
                 else
                 {
-                    MessageBox.Show("Price must be a number");
+                    ErrrorMessage.Content="Price must be a number";
                 }
             }
             else
             {
-                MessageBox.Show("Name, Description, Image Name, Place and Price cannot be empty");
+                ErrrorMessage.Content="Name, Description, Image Name, Place and Price cannot be empty";
             }
         }
 
@@ -202,14 +206,10 @@ namespace PointsOfInterest
 
                 foreach (var item in placesToReturn)
                 {
-                    try
-                    {
-                        item.Rate = item.Rates.Average(x => x.RateValue);
-                    }
-                    catch
-                    {
-                        item.Rate = 0.00m;
-                    }
+                    var ratesHotel = db.Rates_Users_Hotels
+                       .Where(x => x.HotelId == item.Id).ToList();
+
+                    item.Rate = this.CalculateAverageRate(ratesHotel);
                 }
             }
 
@@ -220,9 +220,108 @@ namespace PointsOfInterest
 
         private void Button_Click_4(object sender, RoutedEventArgs e)
         {
-            var window = new MainWindow();
+            var window = new Home();
             window.Show();
             this.Close();
+        }
+
+
+        private decimal CalculateAverageRate(List<Rates_Users_Hotels> rates)
+        {
+            var averageRate = 0.00m;
+            if (rates.Count > 0)
+            {
+                var fiveCount = rates.Count(x => x.Rate == 5);
+                var fourCount = rates.Count(x => x.Rate == 4);
+                var threeCount = rates.Count(x => x.Rate == 3);
+                var twoCount = rates.Count(x => x.Rate == 2);
+                var oneCount = rates.Count(x => x.Rate == 1);
+
+                averageRate = RateCalculator.Calculcate(fiveCount, fourCount, threeCount, twoCount, oneCount);
+            }
+
+            return averageRate;
+        }
+
+        private void SeedFromFile_Click(object sender, RoutedEventArgs e)
+        {
+            var dir = System.IO.Directory.GetParent(Environment.CurrentDirectory).ToString();
+            var path = System.IO.Path.GetDirectoryName(dir);
+            var combinePath = System.IO.Path.Combine(path + "/Files/Hotels" + ".txt");
+            var lines = System.IO.File.ReadAllLines(combinePath);
+
+            var items = new List<Hotel>();
+            foreach (var line in lines)
+            {
+                var splitLine = line.Split(';');
+                var name = splitLine[0];
+                var img = splitLine[1];
+                var des = splitLine[2];
+                var price = decimal.Parse(splitLine[3]);
+                var place = splitLine[4];
+
+                var item = new Hotel
+                {
+                    HotelName = name,
+                    ImageUrl = img,
+                    Price = price,
+                    Place = place,
+                    Descripiton = des
+                };
+                items.Add(item);
+            }
+
+            using (var db = new PointsOfInterestContext())
+            {
+                foreach (var item in items)
+                {
+                    var existItem = db.Hotels.SingleOrDefault(x => x.HotelName == item.HotelName);
+
+                    if (existItem == null)
+                    {
+                        db.Hotels.Add(item);
+                    }
+                }
+
+                db.SaveChanges();
+            }
+
+            var itemsToReturn = new List<Hotel>();
+            using (var db = new PointsOfInterestContext())
+            {
+                itemsToReturn = db.Hotels
+                  .Where(x => (x.IsDeleted == false || x.IsDeleted == null))
+                  .ToList();
+
+                foreach (var item in itemsToReturn)
+                {
+                    var ratesHotel = db.Rates_Users_Hotels
+                       .Where(x => x.HotelId == item.Id).ToList();
+
+                    item.Rate = this.CalculateAverageRate(ratesHotel);
+                }
+            }
+
+            hotels.ItemsSource = itemsToReturn;
+            hotels.Items.Refresh();
+        }
+
+        private void BrowseButton_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog dlg = new OpenFileDialog();
+            dlg.InitialDirectory = "c:\\";
+            dlg.Filter = "Image files (*.jpg)|*.jpg|All Files (*.*)|*.*";
+            dlg.RestoreDirectory = true;
+
+            if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                string selectedFileName = dlg.FileName;
+                HotelImageName.Text = selectedFileName;
+                BitmapImage bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.UriSource = new Uri(selectedFileName);
+                bitmap.EndInit();
+            }
         }
     }
 }

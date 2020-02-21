@@ -17,8 +17,8 @@ namespace PointsOfInterest
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Museum()
         {
-            this.Rates = new HashSet<Rate>();
             this.Comments = new HashSet<Comment>();
+            this.Rates_Users_Museums = new HashSet<Rates_Users_Museums>();
         }
     
         public int Id { get; set; }
@@ -29,8 +29,8 @@ namespace PointsOfInterest
         public Nullable<bool> IsDeleted { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Rate> Rates { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Comment> Comments { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Rates_Users_Museums> Rates_Users_Museums { get; set; }
     }
 }

@@ -1,5 +1,7 @@
-﻿using System;
+﻿using PointsOfInterest.Helpers;
+using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,6 +22,8 @@ namespace PointsOfInterest
     public partial class PlaceWindow : Window
     {
         public Place Plc { get; set; }
+        public bool IsRated { get; set; }
+        public string UserEmail { get; set; }
 
         public PlaceWindow()
         {
@@ -28,8 +32,35 @@ namespace PointsOfInterest
 
         public PlaceWindow(string id)
         {
+            this.UserEmail = ConfigurationManager.AppSettings["CurrentUser"];
             InitializeComponent();
             this.LoadData(id);
+            this.LockButtons();
+        }
+
+        private void LockButtons()
+        {
+            using (var db = new PointsOfInterestContext())
+            {
+                var currentUser = db.Users.SingleOrDefault(x => x.Email == this.UserEmail);
+                this.IsRated = db.Rates_Users_Places
+                    .Any(x => x.PlaceId == this.Plc.Id && x.UserId == currentUser.Id);
+
+                if (this.IsRated)
+                {
+                    PlaceRate.Visibility = Visibility.Hidden;
+                    RateBtn.Visibility = Visibility.Hidden;
+                    DeleteRateBtn.Visibility = Visibility.Visible;
+                }
+                else
+                {
+
+                    PlaceRate.Visibility = Visibility.Visible;
+                    RateBtn.Visibility = Visibility.Visible;
+                    DeleteRateBtn.Visibility = Visibility.Hidden;
+                }
+
+            }
         }
 
         private void LoadData(string id)
@@ -39,18 +70,9 @@ namespace PointsOfInterest
                 var idToNumber = int.Parse(id);
                 using (var db = new PointsOfInterestContext())
                 {
+                    var currentUser = db.Users.SingleOrDefault(x => x.Email == this.UserEmail);
                     var place = db.Places.SingleOrDefault(x => x.Id == idToNumber);
-
-                    try
-                    {
-                        place.Rate = place.Rates.Average(x => x.RateValue);
-                    }
-                    catch
-                    {
-                        place.Rate = 0.00m;
-                    }
-
-
+                    
                     if (place == null)
                     {
                         throw new ArgumentNullException("Invalid place Id");
@@ -59,13 +81,40 @@ namespace PointsOfInterest
                     {
                         this.Plc = place;
 
-                        PlRate.Content = "Average Rate: " + place.Rate;
+
+                        var ratesPlace = db.Rates_Users_Places
+                      .Where(x => x.PlaceId == this.Plc.Id).ToList();
+
+                        var averageRate = 0.0m;
+                        if (ratesPlace.Count > 0)
+                        {
+                            var fiveCount = ratesPlace.Count(x => x.Rate == 5);
+                            var fourCount = ratesPlace.Count(x => x.Rate == 4);
+                            var threeCount = ratesPlace.Count(x => x.Rate == 3);
+                            var twoCount = ratesPlace.Count(x => x.Rate == 2);
+                            var oneCount = ratesPlace.Count(x => x.Rate == 1);
+
+                            averageRate = RateCalculator.Calculcate(fiveCount, fourCount, threeCount, twoCount, oneCount);
+                        }
+
+                        place.Rate = averageRate;
+
+
+                        var currentUserRate = db.Rates_Users_Places
+                       .SingleOrDefault(x => x.PlaceId == this.Plc.Id && x.UserId == currentUser.Id);
+                        if (currentUserRate != null)
+                        {
+                            YourRateLabel.Content = "Your rate is : " + currentUserRate.Rate;
+                        }
+                        
+
+                        PlRate.Value = (int) Math.Round(averageRate);
                         PlaceDes.Content = place.Descripiton;
                         PlaceName.Content = place.PlaceName;
 
                         var dir = System.IO.Directory.GetParent(Environment.CurrentDirectory).ToString();
                         var path = System.IO.Path.GetDirectoryName(dir);
-                        var imagePath = System.IO.Path.Combine(path + "/Images/Places/" + place.ImageUrl + ".jpg");
+                        var imagePath = System.IO.Path.Combine(path + "/Images/Places/" + place.ImageUrl);
                         //Uri resourceUri = new Uri(imagePath, UriKind.Relative);
                         BitmapImage bitmap = new BitmapImage();
                         bitmap.BeginInit();
@@ -82,15 +131,14 @@ namespace PointsOfInterest
 
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void AddRate_Button(object sender, RoutedEventArgs e)
         {
-            var parsedPriceNumber = 0.00m;
+            var parsedRateNumber = 0;
 
-            var parsedPrice = Decimal.TryParse(PlaceRate.Text, out parsedPriceNumber);
-
-            if (parsedPrice)
+            var parsedRate = Int32.TryParse(PlaceRate.Value.ToString(), out parsedRateNumber);
+            if (parsedRate)
             {
-                if (parsedPriceNumber < 1 || parsedPriceNumber > 5)
+                if (parsedRateNumber < 1 || parsedRateNumber > 5)
                 {
                     MessageBox.Show("rate must be between 1 and 5");
                 }
@@ -98,26 +146,34 @@ namespace PointsOfInterest
                 {
                     using (var db = new PointsOfInterestContext())
                     {
-                        var currentRate = new Rate();
-                        currentRate.RateValue = parsedPriceNumber;
+                        var currentUser = db.Users.SingleOrDefault(x => x.Email == this.UserEmail);
 
-                        var place = db.Places.SingleOrDefault(x => x.Id == this.Plc.Id);
-                        place.Rates.Add(currentRate);
+                        if (!this.IsRated)
+                        {
+                            var ratePlace = new Rates_Users_Places
+                            {
+                                UserId = currentUser.Id,
+                                PlaceId = this.Plc.Id,
+                                Rate = parsedRateNumber
+                            };
 
-                        db.SaveChanges();
+                            db.Rates_Users_Places.Add(ratePlace);
+                            db.SaveChanges();
+                        }
                     }
+
+                    var page = new PlaceWindow(this.Plc.Id.ToString());
+                    page.Show();
+                    this.Close();
                 }
             }
             else
             {
                 MessageBox.Show("rate must be a number");
             }
-
-            PlaceRate.Text = "";
-
         }
 
-        private void Button_Click_1(object sender, RoutedEventArgs e)
+        private void AddComment_Button(object sender, RoutedEventArgs e)
         {
             var commentText = CommentVal.Text;
 
@@ -127,6 +183,7 @@ namespace PointsOfInterest
                 {
                     var comment = new Comment();
                     comment.Name = commentText;
+                    comment.UserEmail = this.UserEmail;
 
                     var place = db.Places.SingleOrDefault(x => x.Id == this.Plc.Id);
                     place.Comments.Add(comment);
@@ -139,7 +196,7 @@ namespace PointsOfInterest
 
         }
 
-        private void Button_Click_2(object sender, RoutedEventArgs e)
+        private void ViewComments_Button(object sender, RoutedEventArgs e)
         {
             var comments = new List<Comment>();
             using (var db = new PointsOfInterestContext())
@@ -152,10 +209,27 @@ namespace PointsOfInterest
             this.Close();
         }
 
-        private void Button_Click_3(object sender, RoutedEventArgs e)
+        private void BackToPlaces_Button(object sender, RoutedEventArgs e)
         {
             var window = new Places();
             window.Show();
+            this.Close();
+        }
+
+        private void DeleteRateBtn_Click(object sender, RoutedEventArgs e)
+        {
+            using (var db = new PointsOfInterestContext())
+            {
+                var currentUser = db.Users.SingleOrDefault(x => x.Email == this.UserEmail);
+                var currentRate = db.Rates_Users_Places
+                    .SingleOrDefault(x => x.UserId == currentUser.Id && x.PlaceId == this.Plc.Id);
+
+                db.Rates_Users_Places.Remove(currentRate);
+                db.SaveChanges();
+            }
+
+            var page = new PlaceWindow(this.Plc.Id.ToString());
+            page.Show();
             this.Close();
         }
     }

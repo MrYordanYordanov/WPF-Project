@@ -14,10 +14,25 @@ namespace PointsOfInterest
     
     public partial class User
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
+        public User()
+        {
+            this.Rates_Users_Hotels = new HashSet<Rates_Users_Hotels>();
+            this.Rates_Users_Museums = new HashSet<Rates_Users_Museums>();
+            this.Rates_Users_Places = new HashSet<Rates_Users_Places>();
+        }
+    
         public int Id { get; set; }
         public string Name { get; set; }
         public string Email { get; set; }
         public string Password { get; set; }
         public Nullable<bool> IsAdmin { get; set; }
+    
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Rates_Users_Hotels> Rates_Users_Hotels { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Rates_Users_Museums> Rates_Users_Museums { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Rates_Users_Places> Rates_Users_Places { get; set; }
     }
 }

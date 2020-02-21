@@ -55,7 +55,15 @@ namespace PointsOfInterest
                         
                         ConfigurationManager.AppSettings["CurrentUser"] = existUser.Email;
 
-                        var page = new MainWindow();
+                        var isAdmin = existUser.IsAdmin ?? false;
+                        var adminMessage = "";
+                        if (isAdmin)
+                        {
+                            adminMessage = "with admin permissions";
+                        }
+                        MessageBox.Show($"You have succesfully logged in with {existUser.Email} {adminMessage}");
+
+                        var page = new Home();
                         page.Show();
                         this.Close();
                     }

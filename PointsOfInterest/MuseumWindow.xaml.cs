@@ -1,5 +1,7 @@
-﻿using System;
+﻿using PointsOfInterest.Helpers;
+using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,6 +22,8 @@ namespace PointsOfInterest
     public partial class MuseumWindow : Window
     {
         public Museum Mus { get; set; }
+        public bool IsRated { get; set; }
+        public string UserEmail { get; set; }
 
         public MuseumWindow()
         {
@@ -28,8 +32,36 @@ namespace PointsOfInterest
 
         public MuseumWindow(string id)
         {
+            this.UserEmail = ConfigurationManager.AppSettings["CurrentUser"];
             InitializeComponent();
             this.LoadData(id);
+            this.LockButtons();
+        }
+
+
+        private void LockButtons()
+        {
+            using (var db = new PointsOfInterestContext())
+            {
+                var currentUser = db.Users.SingleOrDefault(x => x.Email == this.UserEmail);
+                this.IsRated = db.Rates_Users_Museums
+                    .Any(x => x.MuseumId == this.Mus.Id && x.UserId == currentUser.Id);
+
+                if (this.IsRated)
+                {
+                    MusRate.Visibility = Visibility.Hidden;
+                    RateBtn.Visibility = Visibility.Hidden;
+                    DeleteRateBtn.Visibility = Visibility.Visible;
+                }
+                else
+                {
+
+                    MusRate.Visibility = Visibility.Visible;
+                    RateBtn.Visibility = Visibility.Visible;
+                    DeleteRateBtn.Visibility = Visibility.Hidden;
+                }
+
+            }
         }
 
         private void LoadData(string id)
@@ -40,15 +72,7 @@ namespace PointsOfInterest
                 using (var db = new PointsOfInterestContext())
                 {
                     var museum = db.Museums.SingleOrDefault(x => x.Id == idToNumber);
-
-                    try
-                    {
-                        museum.AverageRate = museum.Rates.Average(x => x.RateValue);
-                    }
-                    catch
-                    {
-                        museum.AverageRate = 0.00m;
-                    }
+                    var currentUser = db.Users.SingleOrDefault(x => x.Email == this.UserEmail);
 
                     if (museum == null)
                     {
@@ -58,13 +82,40 @@ namespace PointsOfInterest
                     {
                         this.Mus = museum;
 
-                        MuseumRate.Content = "Average Rate: " + museum.AverageRate;
+                        var ratesMus = db.Rates_Users_Museums
+                       .Where(x => x.MuseumId == this.Mus.Id).ToList();
+
+                        var averageRate = 0.0m;
+                        if (ratesMus.Count > 0)
+                        {
+                            var fiveCount = ratesMus.Count(x => x.Rate == 5);
+                            var fourCount = ratesMus.Count(x => x.Rate == 4);
+                            var threeCount = ratesMus.Count(x => x.Rate == 3);
+                            var twoCount = ratesMus.Count(x => x.Rate == 2);
+                            var oneCount = ratesMus.Count(x => x.Rate == 1);
+
+                            averageRate = RateCalculator.Calculcate(fiveCount, fourCount, threeCount, twoCount, oneCount);
+                        }
+
+                        museum.AverageRate = averageRate;
+
+
+                        var currentUserRate = db.Rates_Users_Museums
+                       .SingleOrDefault(x => x.MuseumId == this.Mus.Id && x.UserId == currentUser.Id);
+                        if (currentUserRate != null)
+                        {
+                            YourRateLabel.Content = "Your rate is : " + currentUserRate.Rate;
+                        }
+
+                        AverageRate.Value = (int)Math.Round(averageRate);
+                        
+
                         MusDes.Content = museum.Descripiton;
                         MusName.Content = museum.MuseumName;
 
                         var dir = System.IO.Directory.GetParent(Environment.CurrentDirectory).ToString();
                         var path = System.IO.Path.GetDirectoryName(dir);
-                        var imagePath = System.IO.Path.Combine(path + "/Images/Museums/" + museum.ImageUrl + ".jpg");
+                        var imagePath = System.IO.Path.Combine(path + "/Images/Museums/" + museum.ImageUrl);
                         //Uri resourceUri = new Uri(imagePath, UriKind.Relative);
                         BitmapImage bitmap = new BitmapImage();
                         bitmap.BeginInit();
@@ -81,15 +132,14 @@ namespace PointsOfInterest
 
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void AddRate_Button(object sender, RoutedEventArgs e)
         {
-            var parsedPriceNumber = 0.00m;
+            var parsedRateNumber = 0;
 
-            var parsedPrice = Decimal.TryParse(MusRate.Text, out parsedPriceNumber);
-
-            if (parsedPrice)
+            var parsedRate = Int32.TryParse(MusRate.Value.ToString(), out parsedRateNumber);
+            if (parsedRate)
             {
-                if (parsedPriceNumber < 1 || parsedPriceNumber > 5)
+                if (parsedRateNumber < 1 || parsedRateNumber > 5)
                 {
                     MessageBox.Show("rate must be between 1 and 5");
                 }
@@ -97,27 +147,34 @@ namespace PointsOfInterest
                 {
                     using (var db = new PointsOfInterestContext())
                     {
-                        var currentRate = new Rate();
-                        currentRate.RateValue = parsedPriceNumber;
+                        var currentUser = db.Users.SingleOrDefault(x => x.Email == this.UserEmail);
 
-                        var museum = db.Museums.SingleOrDefault(x => x.Id == this.Mus.Id);
-                        museum.Rates.Add(currentRate);
+                        if (!this.IsRated)
+                        {
+                            var rateMuseum = new Rates_Users_Museums
+                            {
+                                UserId = currentUser.Id,
+                                MuseumId = this.Mus.Id,
+                                Rate = parsedRateNumber
+                            };
 
-                        db.SaveChanges();
+                            db.Rates_Users_Museums.Add(rateMuseum);
+                            db.SaveChanges();
+                        }
                     }
+
+                    var page = new MuseumWindow(this.Mus.Id.ToString());
+                    page.Show();
+                    this.Close();
                 }
             }
             else
             {
                 MessageBox.Show("rate must be a number");
             }
-
-            MusRate.Text = "";
-
-
         }
 
-        private void Button_Click_1(object sender, RoutedEventArgs e)
+        private void AddComment_Button(object sender, RoutedEventArgs e)
         {
             var commentText = CommentVal.Text;
 
@@ -127,6 +184,7 @@ namespace PointsOfInterest
                 {
                     var comment = new Comment();
                     comment.Name = commentText;
+                    comment.UserEmail = this.UserEmail;
 
                     var museum = db.Museums.SingleOrDefault(x => x.Id == this.Mus.Id);
                     museum.Comments.Add(comment);
@@ -138,7 +196,7 @@ namespace PointsOfInterest
             CommentVal.Text = "";
         }
 
-        private void Button_Click_2(object sender, RoutedEventArgs e)
+        private void ViewComments_Button(object sender, RoutedEventArgs e)
         {
             var comments = new List<Comment>();
             using (var db = new PointsOfInterestContext())
@@ -151,10 +209,27 @@ namespace PointsOfInterest
             this.Close();
         }
 
-        private void Button_Click_3(object sender, RoutedEventArgs e)
+        private void BackToMuseums_Button(object sender, RoutedEventArgs e)
         {
             var window = new Museums();
             window.Show();
+            this.Close();
+        }
+
+        private void DeleteRateBtn_Click(object sender, RoutedEventArgs e)
+        {
+            using (var db = new PointsOfInterestContext())
+            {
+                var currentUser = db.Users.SingleOrDefault(x => x.Email == this.UserEmail);
+                var currentRate = db.Rates_Users_Museums
+                    .SingleOrDefault(x => x.UserId == currentUser.Id && x.MuseumId == this.Mus.Id);
+
+                db.Rates_Users_Museums.Remove(currentRate);
+                db.SaveChanges();
+            }
+
+            var page = new MuseumWindow(this.Mus.Id.ToString());
+            page.Show();
             this.Close();
         }
     }

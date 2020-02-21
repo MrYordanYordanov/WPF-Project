@@ -39,7 +39,7 @@ namespace PointsOfInterest
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            var window = new MainWindow();
+            var window = new Home();
             window.Show();
             this.Close();
         }
